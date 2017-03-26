@@ -1,7 +1,12 @@
 # jfx-directory-explorer
 
-Provides a JavaFX component displaying the files and directories of a directory.
+Provides a JavaFX component displaying the files and directories of a directory as a list.
 The view is updated automatically if something in the directory has changed.
+
+## Motivation
+Sadly JavaFX does not provide such a component out of the box.
+Although JFX provides file and directory choosers you cannot embed them into your application.
+This little library wants to change this!
 
 ## Add as dependency
 
