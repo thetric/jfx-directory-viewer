@@ -1,5 +1,6 @@
 package com.github.thetric.direxp;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javafx.application.Application;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -11,9 +12,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -32,27 +31,7 @@ public final class DirExplorer extends Application {
     @Override
     public void start(final Stage stage) {
         final ListView<Path> listView = new ListView<>();
-        listView.setCellFactory(param -> new ListCell<Path>() {
-            @Override
-            protected void updateItem(Path item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if (!empty && item != null) {
-                    setText(item.getFileName().toString());
-                    if (Files.isDirectory(item)) {
-                        setGraphic(new Label("dir"));
-                        setStyle("-fx-background-color: lightcoral");
-                    } else {
-                        setGraphic(new Label("file"));
-                        setStyle(null);
-                    }
-                } else {
-                    setGraphic(null);
-                    setText(null);
-                    setStyle(null);
-                }
-            }
-        });
+        listView.setCellFactory(param -> new PathListCell());
         final Consumer<List<Path>> updater = newValue -> {
             newValue.sort(dirsFirstOrderByNameComparator);
             listView.getItems().setAll(newValue);
@@ -89,14 +68,20 @@ public final class DirExplorer extends Application {
             fsWatchServiceTask = fsWatchService.createTask();
             fsWatchServiceTask.valueProperty()
                               .addListener((observable, oldValue, newValue) -> filesUpdateHandler.accept(newValue));
-            executorService.submit(fsWatchServiceTask);
+            scheduleFsWatchTask();
         }
+    }
+
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_BAD_PRACTICE",
+            justification = "It takes quite a long time for a polling task to complete")
+    private void scheduleFsWatchTask() {
+        executorService.submit(fsWatchServiceTask);
     }
 
     private static final class FsWatchService extends Service<List<Path>> {
         private final Path dir;
 
-        private FsWatchService(Path dir) {
+        private FsWatchService(final Path dir) {
             this.dir = dir;
         }
 
@@ -106,7 +91,8 @@ public final class DirExplorer extends Application {
                 @Override
                 protected List<Path> call() throws Exception {
                     watchDir(dir, this::updateValue);
-                    return null;
+                    // we are publishing the intermediate values via `updateValue` so the return value is not interesting
+                    return Collections.emptyList();
                 }
             };
         }
@@ -119,12 +105,12 @@ public final class DirExplorer extends Application {
             path.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 
             while (this.stateProperty().get() != State.CANCELLED) {
-                final WatchKey watckKey = watchService.take();
-                final List<WatchEvent<?>> events = watckKey.pollEvents();
+                final WatchKey watchKey = watchService.take();
+                final List<WatchEvent<?>> events = watchKey.pollEvents();
                 if (!events.isEmpty()) {
                     updateFileList(path, updateFunction);
                 }
-                final boolean valid = watckKey.reset();
+                final boolean valid = watchKey.reset();
                 if (!valid) {
                     break;
                 }
@@ -134,7 +120,7 @@ public final class DirExplorer extends Application {
         private void updateFileList(final Path dir, final Consumer<List<Path>> updateFunction) throws IOException {
             final List<Path> allFiles = Files.list(dir).collect(Collectors.toList());
             final List<Path> visibleFiles = new ArrayList<>();
-            for (Path path : allFiles) {
+            for (final Path path : allFiles) {
                 if (!Files.isHidden(path) && !isDotFile(path)) {
                     visibleFiles.add(path);
                 }
@@ -144,7 +130,32 @@ public final class DirExplorer extends Application {
         }
 
         private boolean isDotFile(final Path file) {
-            return file.getFileName().toString().startsWith(".");
+            final Path fileName = file.getFileName();
+            return fileName == null || fileName.toString().startsWith(".");
+        }
+    }
+
+    private static final class PathListCell extends ListCell<Path> {
+        @Override
+        protected void updateItem(final Path item, final boolean empty) {
+            super.updateItem(item, empty);
+
+            if (!empty && item != null) {
+                setText(Optional.ofNullable(item.getFileName())
+                                .map(Path::toString)
+                                .orElse(""));
+                if (Files.isDirectory(item)) {
+                    setGraphic(new Label("dir"));
+                    setStyle("-fx-background-color: lightcoral");
+                } else {
+                    setGraphic(new Label("file"));
+                    setStyle(null);
+                }
+            } else {
+                setGraphic(null);
+                setText(null);
+                setStyle(null);
+            }
         }
     }
 }
