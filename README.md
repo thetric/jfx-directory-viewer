@@ -1,6 +1,6 @@
 # jfx-directory-explorer
 
-[![Travis](https://img.shields.io/travis/thetric/jfx-directory-explorer.svg?style=flat-square&maxAge=2592000)](https://travis-ci.org/thetric/jfx-directory-explorer)
+[![Travis](https://img.shields.io/travis/thetric/jfx-directory-explorer.svg?style=flat-square)](https://travis-ci.org/thetric/jfx-directory-explorer)
 
 Provides a JavaFX component displaying the files and directories of a directory as a list.
 The view is updated automatically if something in the directory has changed.
