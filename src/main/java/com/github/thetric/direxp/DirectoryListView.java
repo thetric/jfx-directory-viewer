@@ -38,7 +38,7 @@ public class DirectoryListView extends ListView<Path> {
     private final SimpleObjectProperty<Path> currentDirectory = new SimpleObjectProperty<>();
 
     public DirectoryListView() {
-        setCellFactory(param -> new PathListCell());
+        setCellFactory(param -> new DefaultPathListCell());
         final Consumer<List<Path>> updater = newValue -> {
             newValue.sort(dirsFirstOrderByNameComparator);
             getItems().setAll(newValue);
@@ -154,7 +154,7 @@ public class DirectoryListView extends ListView<Path> {
         }
     }
 
-    private static final class PathListCell extends ListCell<Path> {
+    private static final class DefaultPathListCell extends ListCell<Path> {
         @Override
         protected void updateItem(final Path item, final boolean empty) {
             super.updateItem(item, empty);
