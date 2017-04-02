@@ -30,9 +30,9 @@ import static java.util.Comparator.comparing;
  * @author thetric
  */
 public class DirectoryListView extends ListView<Path> {
+    private static final Comparator<Path> INSENSITIVE_FILE_NAME_COMPARATOR = createCaseInsensitiveFileNameComparator();
+
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final Comparator<Path> dirsFirstOrderByNameComparator = comparing((Function<Path, Boolean>) path -> !Files
-            .isDirectory(path)).thenComparing(Path::getFileName);
     private Task<List<Path>> fsWatchServiceTask;
 
     private final SimpleObjectProperty<Path> currentDirectory = new SimpleObjectProperty<>();
@@ -40,7 +40,7 @@ public class DirectoryListView extends ListView<Path> {
     public DirectoryListView() {
         setCellFactory(param -> new DefaultPathListCell());
         final Consumer<List<Path>> updater = newValue -> {
-            newValue.sort(dirsFirstOrderByNameComparator);
+            newValue.sort(INSENSITIVE_FILE_NAME_COMPARATOR);
             getItems().setAll(newValue);
         };
         setOnMouseClicked(event -> {
@@ -50,6 +50,11 @@ public class DirectoryListView extends ListView<Path> {
         });
 
         currentDirectory.addListener((observable, oldValue, newValue) -> updateDir(newValue, updater));
+    }
+
+    private static Comparator<Path> createCaseInsensitiveFileNameComparator() {
+        return comparing((Function<Path, Boolean>) path -> !Files.isDirectory(path))
+                .thenComparing(Path::getFileName);
     }
 
     public final Path getCurrentDirectory() {
