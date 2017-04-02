@@ -22,49 +22,5 @@ tasks.withType(JavaCompile) {
     options.incremental = true
 }
 
-// checkstyle config
-checkstyle {
-    toolVersion = '7.6'
-    configFile = rootProject.file('config/checkstyle.xml')
-}
-
-checkstyleMain {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-
-checkstyleTest.enabled = false
-
-dependencies {
-    checkstyle "com.puppycrawl.tools:checkstyle:$checkstyle.toolVersion"
-    checkstyle 'com.github.sevntu.checkstyle:sevntu-checks:1.23.1'
-}
-
-// findbugs config
-findbugs {
-    toolVersion = '3.0.1'
-    ignoreFailures = false
-
-    effort = 'max'
-    reportLevel = 'low'
-
-    excludeFilter = rootProject.file('config/findbugs-exclude.xml')
-}
-
-findbugsMain {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-
-findbugsTest.enabled = false
-
-dependencies {
-    // lombok needs findbugs on the classpath to add suppress annotations
-    compileClasspath "com.google.code.findbugs:findbugs:$findbugs.toolVersion"
-
-    findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:6.8.4'
-}
+apply from: 'config/checkstyle.gradle'
+apply from: 'config/findbugs.gradle'
