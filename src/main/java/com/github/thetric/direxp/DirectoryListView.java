@@ -165,7 +165,7 @@ public class DirectoryListView extends ListView<Path> {
                                 .orElse(""));
                 if (Files.isDirectory(item)) {
                     setGraphic(new Label("dir"));
-                    setStyle("-fx-background-color: lightcoral");
+                    setStyle("-fx-font-weight: bold");
                 } else {
                     setGraphic(new Label("file"));
                     setStyle(null);
