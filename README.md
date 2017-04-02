@@ -13,3 +13,15 @@ This little library wants to change this!
 ## Add as dependency
 
 You can get the library via [JitPack.io](https://jitpack.io/#thetric/jfx-directory-explorer).
+
+```gradle
+// add JitPack.io repository
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+// add dependency
+dependencies {
+    compile 'com.github.thetric:jfx-directory-explorer:1.0'
+}
+```
