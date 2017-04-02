@@ -42,7 +42,7 @@ public final class DirExplorer extends Application {
             }
         });
 
-        final Path startDir = Paths.get(System.getProperty("user.home")).resolve("Downloads");
+        final Path startDir = Paths.get(System.getProperty("user.home"));
         updateDir(startDir, updater, stage);
 
         final Scene scene = new Scene(listView);
