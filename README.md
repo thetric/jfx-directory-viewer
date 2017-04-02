@@ -26,3 +26,18 @@ dependencies {
     compile 'com.github.thetric:jfx-directory-explorer:1.0'
 }
 ```
+
+## Usage
+
+```java
+final DirectoryListView dirListView = new DirectoryListView();
+
+final Path startDir = Paths.get(System.getProperty("user.home"));
+// updates list view automatically to the new root path
+dirListView.setCurrentDirectory(startDir);
+// or
+dirListView.currentDirectoryProperty().set()
+
+// clean up after disposing
+dirListView.unwatchDirectory();
+```
