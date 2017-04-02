@@ -1,5 +1,5 @@
 checkstyle {
-    toolVersion = '7.6'
+    toolVersion = '7.6.1'
     configFile = rootProject.file('config/checkstyle.xml')
 }
 
