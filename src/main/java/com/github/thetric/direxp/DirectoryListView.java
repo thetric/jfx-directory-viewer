@@ -54,7 +54,10 @@ public class DirectoryListView extends ListView<Path> {
 
     private static Comparator<Path> createCaseInsensitiveFileNameComparator() {
         return comparing((Function<Path, Boolean>) path -> !Files.isDirectory(path))
-                .thenComparing(Path::getFileName);
+                .thenComparing(path -> Optional.ofNullable(path.getFileName())
+                                               .map(Path::toString)
+                                               .orElse(""),
+                               String::compareToIgnoreCase);
     }
 
     public final Path getCurrentDirectory() {
