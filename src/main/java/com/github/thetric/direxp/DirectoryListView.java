@@ -64,8 +64,16 @@ public class DirectoryListView extends ListView<Path> {
         return currentDirectory.get();
     }
 
+    /**
+     * Sets the new directory to watch.
+     *
+     * @param newPath
+     *         new directory
+     * @throws IllegalArgumentException
+     *         if the path does not exist or is not a directory
+     */
     public final void setCurrentDirectory(final Path newPath) {
-        Objects.requireNonNull(newPath);
+        checkPathIsDir(newPath);
         currentDirectory.set(newPath);
     }
 
@@ -79,16 +87,23 @@ public class DirectoryListView extends ListView<Path> {
     }
 
     private void updateDir(final Path dir, final Consumer<List<Path>> filesUpdateHandler) {
-        if (Files.notExists(dir)) {
-            System.err.println("Non existing dir: " + dir.toAbsolutePath());
+        checkPathIsDir(dir);
+
+        cancelCurrentWatchTask();
+        final FsWatchService fsWatchService = new FsWatchService(dir);
+        fsWatchServiceTask = fsWatchService.createTask();
+        fsWatchServiceTask.valueProperty()
+                          .addListener((observable, oldValue, newValue) -> filesUpdateHandler.accept(newValue));
+        scheduleFsWatchTask();
+    }
+
+    private void checkPathIsDir(final Path path) {
+        Objects.requireNonNull(path, "path must not be null");
+        if (Files.notExists(path)) {
+            throw new IllegalArgumentException("Could not find " + path);
         }
-        if (Files.isDirectory(dir)) {
-            cancelCurrentWatchTask();
-            final FsWatchService fsWatchService = new FsWatchService(dir);
-            fsWatchServiceTask = fsWatchService.createTask();
-            fsWatchServiceTask.valueProperty()
-                              .addListener((observable, oldValue, newValue) -> filesUpdateHandler.accept(newValue));
-            scheduleFsWatchTask();
+        if (!Files.isDirectory(path)) {
+            throw new IllegalArgumentException(path + " is not a directory");
         }
     }
 
