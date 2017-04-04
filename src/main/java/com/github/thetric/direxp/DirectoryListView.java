@@ -161,7 +161,6 @@ public class DirectoryListView extends ListView<Path> {
                     visibleFiles.add(path);
                 }
             }
-            visibleFiles.add(dir.resolve(".."));
             updateFunction.accept(visibleFiles);
         }
 
