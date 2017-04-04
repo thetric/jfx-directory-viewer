@@ -40,8 +40,10 @@ public class DirectoryListView extends ListView<Path> {
     public DirectoryListView() {
         setCellFactory(param -> new DefaultPathListCell());
         final Consumer<List<Path>> updater = newValue -> {
-            newValue.sort(INSENSITIVE_FILE_NAME_COMPARATOR);
-            getItems().setAll(newValue);
+            final List<Path> filteredAndSortedPaths = newValue.stream()
+                                                              .sorted(INSENSITIVE_FILE_NAME_COMPARATOR)
+                                                              .collect(Collectors.toList());
+            getItems().setAll(filteredAndSortedPaths);
         };
         currentDirectory.addListener((observable, oldValue, newValue) -> updateDir(newValue, updater));
     }
