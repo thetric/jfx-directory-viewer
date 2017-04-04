@@ -43,12 +43,6 @@ public class DirectoryListView extends ListView<Path> {
             newValue.sort(INSENSITIVE_FILE_NAME_COMPARATOR);
             getItems().setAll(newValue);
         };
-        setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                updateDir(getSelectionModel().getSelectedItem(), updater);
-            }
-        });
-
         currentDirectory.addListener((observable, oldValue, newValue) -> updateDir(newValue, updater));
     }
 
