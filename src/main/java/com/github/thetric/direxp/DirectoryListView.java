@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -37,10 +38,14 @@ public class DirectoryListView extends ListView<Path> {
 
     private final SimpleObjectProperty<Path> currentDirectory = new SimpleObjectProperty<>();
 
+    private static final Predicate<Path> DEFAULT_ITEM_FILTER = p -> true;
+    private Predicate<Path> pathItemFilter = DEFAULT_ITEM_FILTER;
+
     public DirectoryListView() {
         setCellFactory(param -> new DefaultPathListCell());
         final Consumer<List<Path>> updater = newValue -> {
             final List<Path> filteredAndSortedPaths = newValue.stream()
+                                                              .filter(pathItemFilter)
                                                               .sorted(INSENSITIVE_FILE_NAME_COMPARATOR)
                                                               .collect(Collectors.toList());
             getItems().setAll(filteredAndSortedPaths);
@@ -80,6 +85,26 @@ public class DirectoryListView extends ListView<Path> {
     public final void unwatchDirectory() {
         cancelCurrentWatchTask();
         executorService.shutdownNow();
+    }
+
+    /**
+     * Sets a new {@link Path} filter for filtering the entries in the {@link DirectoryListView}. The filter will be
+     * applied after the next change in the directory.
+     *
+     * @param newFilter
+     *         new filter, if {@code null} no filter will be applied
+     */
+    public final void setPathItemFilter(final Predicate<Path> newFilter) {
+        pathItemFilter = newFilter == null ? DEFAULT_ITEM_FILTER : newFilter;
+    }
+
+    /**
+     * returns the current {@link Path} item filter.
+     *
+     * @return current {@link Path} item filter, never {@code null}
+     */
+    public final Predicate<Path> getPathItemFilter() {
+        return pathItemFilter;
     }
 
     private void updateDir(final Path dir, final Consumer<List<Path>> filesUpdateHandler) {
