@@ -1,6 +1,7 @@
 package com.github.thetric.direxp;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -19,19 +20,19 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardWatchEventKinds.*;
-import static java.util.Comparator.comparing;
 
 /**
- * {@link ListView} displaying the items of a directory. The list view is updated automatically if the directory's
- * content changes.
+ * {@link ListView} displaying the items of a directory. The list view is updated automatically if
+ * the directory's content changes.
  *
- * <p><b>IMPORTANT:</b> The user of this class must call {@link #unwatchDirectory()} manually after disposing the control to
- * prevent memory leaks.
+ * <p><b>IMPORTANT:</b> The user of this class must call {@link #unwatchDirectory()} manually after
+ * disposing the control to prevent memory leaks.
  *
  * @author thetric
  */
 public class DirectoryListView extends ListView<Path> {
-    private static final Comparator<Path> INSENSITIVE_FILE_NAME_COMPARATOR = createCaseInsensitiveFileNameComparator();
+    private static final Comparator<Path> CASE_INSENSITIVE_FILENAME_COMP =
+        createCaseInsensitiveFileNameComparator();
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Task<List<Path>> fsWatchServiceTask;
@@ -46,19 +47,22 @@ public class DirectoryListView extends ListView<Path> {
         final Consumer<List<Path>> updater = newValue -> {
             final List<Path> filteredAndSortedPaths = newValue.stream()
                                                               .filter(pathItemFilter)
-                                                              .sorted(INSENSITIVE_FILE_NAME_COMPARATOR)
+                                                              .sorted(
+                                                                  CASE_INSENSITIVE_FILENAME_COMP)
                                                               .collect(Collectors.toList());
             getItems().setAll(filteredAndSortedPaths);
         };
-        currentDirectory.addListener((observable, oldValue, newValue) -> updateDir(newValue, updater));
+        currentDirectory.addListener(
+            (observable, oldValue, newValue) -> updateDir(newValue, updater)
+        );
     }
 
     private static Comparator<Path> createCaseInsensitiveFileNameComparator() {
-        return comparing((Function<Path, Boolean>) path -> !Files.isDirectory(path))
-                .thenComparing(path -> Optional.ofNullable(path.getFileName())
-                                               .map(Path::toString)
-                                               .orElse(""),
-                               String::compareToIgnoreCase);
+        return Comparator.comparing((Function<Path, Boolean>) path -> !Files.isDirectory(path))
+                         .thenComparing(path -> Optional.ofNullable(path.getFileName())
+                                                        .map(Path::toString)
+                                                        .orElse(""),
+                                        String::compareToIgnoreCase);
     }
 
     public final Path getCurrentDirectory() {
@@ -69,16 +73,16 @@ public class DirectoryListView extends ListView<Path> {
      * Sets the new directory to watch.
      *
      * @param newPath
-     *         new directory
+     *     new directory
      * @throws IllegalArgumentException
-     *         if the path does not exist or is not a directory
+     *     if the path does not exist or is not a directory
      */
     public final void setCurrentDirectory(final Path newPath) {
         checkPathIsDir(newPath);
         currentDirectory.set(newPath);
     }
 
-    public final SimpleObjectProperty<Path> currentDirectoryProperty() {
+    public final ObjectProperty<Path> currentDirectoryProperty() {
         return currentDirectory;
     }
 
@@ -88,11 +92,11 @@ public class DirectoryListView extends ListView<Path> {
     }
 
     /**
-     * Sets a new {@link Path} filter for filtering the entries in the {@link DirectoryListView}. The filter will be
-     * applied after the next change in the directory.
+     * Sets a new {@link Path} filter for filtering the entries in the {@link DirectoryListView}.
+     * The filter will be applied after the next change in the directory.
      *
      * @param newFilter
-     *         new filter, if {@code null} no filter will be applied
+     *     new filter, if {@code null} no filter will be applied
      */
     public final void setPathItemFilter(final Predicate<Path> newFilter) {
         pathItemFilter = newFilter == null ? DEFAULT_ITEM_FILTER : newFilter;
@@ -113,8 +117,9 @@ public class DirectoryListView extends ListView<Path> {
         cancelCurrentWatchTask();
         final FsWatchService fsWatchService = new FsWatchService(dir);
         fsWatchServiceTask = fsWatchService.createTask();
-        fsWatchServiceTask.valueProperty()
-                          .addListener((observable, oldValue, newValue) -> filesUpdateHandler.accept(newValue));
+        fsWatchServiceTask.valueProperty().addListener(
+            (observable, oldValue, newValue) -> filesUpdateHandler.accept(newValue)
+        );
         scheduleFsWatchTask();
     }
 
@@ -135,7 +140,7 @@ public class DirectoryListView extends ListView<Path> {
     }
 
     @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_BAD_PRACTICE",
-            justification = "It takes quite a long time for a polling task to complete")
+        justification = "It takes quite a long time for a polling task to complete")
     private void scheduleFsWatchTask() {
         executorService.submit(fsWatchServiceTask);
     }
@@ -154,13 +159,15 @@ public class DirectoryListView extends ListView<Path> {
                 @Override
                 protected List<Path> call() throws Exception {
                     watchDir(dir, this::updateValue);
-                    // we are publishing the intermediate values via `updateValue` so the return value is not interesting
+                    // we are publishing the intermediate values via `updateValue` so the return
+                    // value is not interesting
                     return Collections.emptyList();
                 }
             };
         }
 
-        private void watchDir(final Path path, final Consumer<List<Path>> updateFunction) throws IOException, InterruptedException {
+        private void watchDir(final Path path, final Consumer<List<Path>> updateFunction)
+            throws IOException, InterruptedException {
             // initial file list
             updateFileList(path, updateFunction);
 
@@ -180,18 +187,19 @@ public class DirectoryListView extends ListView<Path> {
             }
         }
 
-        private void updateFileList(final Path dir, final Consumer<List<Path>> updateFunction) throws IOException {
+        private void updateFileList(final Path dir, final Consumer<List<Path>> updateFunction)
+            throws IOException {
             final List<Path> allFiles = Files.list(dir).collect(Collectors.toList());
             final List<Path> visibleFiles = new ArrayList<>();
             for (final Path path : allFiles) {
-                if (!Files.isHidden(path) && !isDotFile(path)) {
+                if (!Files.isHidden(path) && !isHiddenFile(path)) {
                     visibleFiles.add(path);
                 }
             }
             updateFunction.accept(visibleFiles);
         }
 
-        private boolean isDotFile(final Path file) {
+        private static boolean isHiddenFile(final Path file) {
             final Path fileName = file.getFileName();
             return fileName == null || fileName.toString().startsWith(".");
         }
