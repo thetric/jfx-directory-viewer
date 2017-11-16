@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'checkstyle'
     id 'com.github.spotbugs' version '1.6.0'
+    id 'maven'
 }
 
 repositories {
@@ -71,4 +72,34 @@ dependencies {
 
     spotbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:7.0.5.sb'
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1'
+}
+
+// packaging
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            licenses {
+                license {
+                    name 'MIT License'
+                    url 'https://opensource.org/licenses/MIT'
+                    distribution 'repo'
+                }
+            }
+        }
+    }
 }
