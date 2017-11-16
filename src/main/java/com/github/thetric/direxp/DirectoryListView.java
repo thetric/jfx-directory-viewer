@@ -107,15 +107,6 @@ public class DirectoryListView extends ListView<Path> {
         pathItemFilter = newFilter == null ? DEFAULT_ITEM_FILTER : newFilter;
     }
 
-    /**
-     * The current {@link Path} item filter.
-     *
-     * @return current {@link Path} item filter, never {@code null}
-     */
-    public final Predicate<Path> getPathItemFilter() {
-        return pathItemFilter;
-    }
-
     private void updateDir(final Path dir, final Consumer<List<Path>> filesUpdateHandler) {
         checkPathIsDir(dir);
 
