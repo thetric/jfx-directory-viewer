@@ -1,7 +1,7 @@
-# jfx-directory-explorer
+# jfx-directory-viewer
 
-[![Travis](https://img.shields.io/travis/thetric/jfx-directory-explorer.svg?style=flat-square)](https://travis-ci.org/thetric/jfx-directory-explorer)
-[![GitHub release](https://img.shields.io/github/release/thetric/jfx-directory-explorer.svg)](https://github.com/thetric/jfx-directory-explorer/releases)
+[![Travis](https://img.shields.io/travis/thetric/jfx-directory-viewer.svg?style=flat-square)](https://travis-ci.org/thetric/jfx-directory-viewer)
+[![GitHub release](https://img.shields.io/github/release/thetric/jfx-directory-viewer.svg?style=flat-square)](https://github.com/thetric/jfx-directory-viewer/releases)
 
 Provides a JavaFX component displaying the files and directories of a directory as a list.
 The view is updated automatically if something in the directory has changed.
@@ -13,7 +13,7 @@ This little library wants to change this!
 
 ## Add as dependency
 
-You can get the library via [JitPack.io](https://jitpack.io/#thetric/jfx-directory-explorer).
+You can get the library via [JitPack.io](https://jitpack.io/#thetric/jfx-directory-viewer).
 
 ```gradle
 // add JitPack.io repository
@@ -23,7 +23,7 @@ repositories {
 
 // add dependency
 dependencies {
-    compile 'com.github.thetric:jfx-directory-explorer:1.0'
+    compile 'com.github.thetric:jfx-directory-viewer:1.0'
 }
 ```
 
