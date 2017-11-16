@@ -19,8 +19,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
