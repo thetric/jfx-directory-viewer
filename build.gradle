@@ -22,5 +22,53 @@ tasks.withType(JavaCompile) {
     options.incremental = true
 }
 
-apply from: 'config/checkstyle.gradle'
-apply from: 'config/spotbugs.gradle'
+// checkstyle setup
+checkstyle {
+    toolVersion = '8.4'
+    configFile = rootProject.file('gradle/checkstyle.xml')
+    showViolations = false
+}
+
+checkstyleMain {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        html.stylesheet resources.text.fromFile('gradle/checkstyle.xsl')
+    }
+}
+
+checkstyleTest.enabled = false
+
+dependencies {
+    checkstyle "com.puppycrawl.tools:checkstyle:$checkstyle.toolVersion"
+    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.24.2'
+}
+
+// spotbugs setup
+spotbugs {
+    toolVersion = '3.1.0'
+    ignoreFailures = false
+
+    effort = 'max'
+    reportLevel = 'low'
+
+    excludeFilter = file('gradle/spotbugs-exclude.xml')
+}
+
+spotbugsMain {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        html.stylesheet resources.text.fromFile('gradle/spotbugs.xsl')
+    }
+}
+
+spotbugsTest.enabled = false
+
+dependencies {
+    // lombok needs findbugs on the classpath to add suppress annotations
+    compileClasspath "com.github.spotbugs:spotbugs:$spotbugs.toolVersion"
+
+    spotbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:7.0.5.sb'
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1'
+}
