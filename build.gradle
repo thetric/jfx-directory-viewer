@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'checkstyle'
-    id 'findbugs'
+    id 'com.github.spotbugs' version '1.6.0'
 }
 
 repositories {
@@ -23,4 +23,4 @@ tasks.withType(JavaCompile) {
 }
 
 apply from: 'config/checkstyle.gradle'
-apply from: 'config/findbugs.gradle'
+apply from: 'config/spotbugs.gradle'
