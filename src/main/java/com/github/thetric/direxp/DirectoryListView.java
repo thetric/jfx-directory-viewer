@@ -19,6 +19,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
@@ -86,6 +88,9 @@ public class DirectoryListView extends ListView<Path> {
         return currentDirectory;
     }
 
+    /**
+     * Stops watching the directory.
+     */
     public final void unwatchDirectory() {
         cancelCurrentWatchTask();
         executorService.shutdownNow();
@@ -103,7 +108,7 @@ public class DirectoryListView extends ListView<Path> {
     }
 
     /**
-     * returns the current {@link Path} item filter.
+     * The current {@link Path} item filter.
      *
      * @return current {@link Path} item filter, never {@code null}
      */
