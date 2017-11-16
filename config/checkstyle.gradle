@@ -1,12 +1,14 @@
 checkstyle {
-    toolVersion = '7.6.1'
+    toolVersion = '8.4'
     configFile = rootProject.file('config/checkstyle.xml')
+    showViolations = false
 }
 
 checkstyleMain {
     reports {
         xml.enabled = false
         html.enabled = true
+        html.stylesheet resources.text.fromFile('config/checkstyle.xsl')
     }
 }
 
@@ -14,5 +16,5 @@ checkstyleTest.enabled = false
 
 dependencies {
     checkstyle "com.puppycrawl.tools:checkstyle:$checkstyle.toolVersion"
-    checkstyle 'com.github.sevntu.checkstyle:sevntu-checks:1.23.1'
+    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.24.2'
 }
